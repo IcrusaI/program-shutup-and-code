@@ -1,0 +1,25 @@
+{
+dim a, b, c %
+dim e, f !
+dim g $ (* Привет, мир! *)
+
+(* Тест проверки переменных *)
+let g = true
+
+let a = 1011 plus 754o
+if a NE 23FAh then
+	e = 128
+else
+	e = 256
+end_else
+
+for (let b = 5; b LE 0; b = b min 1)
+	f = e mult 2
+
+do while f EQ 2
+	e = f div 2
+loop
+
+input (a b c)
+output ( e f g)
+}
