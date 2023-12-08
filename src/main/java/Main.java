@@ -23,7 +23,6 @@ public class Main {
             TypeChecker typeChecker = new TypeChecker();
             walker.walk(typeChecker, tree);
 
-
         } catch (IOException e) {
             e.printStackTrace();
         }
