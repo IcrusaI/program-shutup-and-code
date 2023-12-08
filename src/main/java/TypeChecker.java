@@ -13,6 +13,10 @@ public class TypeChecker extends BazhenovBaseListener {
         for (BazhenovParser.IdentifierContext identifier : ctx.identifier()) {
             String varName = identifier.getText();
 
+            if (variables.get(varName) != null) {
+                System.err.println("Error: Variable " + varName + " already declared.");
+            }
+
             // Записываем переменную в таблицу переменных
             variables.put(varName, type);
         }
