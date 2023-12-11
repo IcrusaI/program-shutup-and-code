@@ -4,11 +4,11 @@ dim e, f !
 dim g $ (* Привет, мир! *)
 
 (* Тест проверки переменных *)
-let g = true
+let b = 1 div 2
 
 let a = 1011 plus 754o
 if a NE 23FAh then
-	e = 128
+	a = 128 div 1
 else
 	e = 256
 end_else

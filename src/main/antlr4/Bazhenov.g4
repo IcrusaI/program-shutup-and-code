@@ -1,72 +1,48 @@
 grammar Bazhenov;
 
-// Правила парсера
-program: OPEN_CURLY (statement)* CLOSE_CURLY ;
+// Основные структуры
+program: '{' (declaration | statement)* '}' ;
 
-statement: varDeclaration
+declaration: 'dim' IDENTIFIER (',' IDENTIFIER)* type ;
+
+type: TYPE_INTEGER | TYPE_REAL | TYPE_BOOLEAN ;
+
+// Операторы
+statement: compound
          | assignment
-         | ifStatement
-         | forLoop
-         | doWhileLoop
-         | inputStatement
-         | outputStatement ;
+         | conditional
+         | fixedLoop
+         | conditionalLoop
+         | input
+         | output
+         ;
 
-varDeclaration: DIM identifier (COMMA identifier)* type ;
+compound: OPEN_CURLY statement (SEMICOLON statement)* CLOSE_CURLY ;
+assignment: LET? IDENTIFIER EQUALS expression ;
+conditional: IF expression THEN statement (ELSE statement)? END_ELSE ;
+fixedLoop: FOR OPEN_PAREN assignment SEMICOLON expression SEMICOLON assignment CLOSE_PAREN statement ;
+conditionalLoop: DO WHILE expression statement LOOP ;
+input: INPUT OPEN_PAREN IDENTIFIER (IDENTIFIER)* CLOSE_PAREN ;
+output: OUTPUT OPEN_PAREN expression (expression)* CLOSE_PAREN ;
 
-assignment: LET? identifier EQUALS expression ;
-
-ifStatement: IF expression THEN statement (ELSE statement)? END_ELSE ;
-
-forLoop: FOR OPEN_PAREN assignment SEMICOLON expression SEMICOLON assignment CLOSE_PAREN statement ;
-
-doWhileLoop: DO WHILE expression statement LOOP ;
-
-inputStatement: INPUT OPEN_PAREN identifier (identifier)* CLOSE_PAREN ;
-
-outputStatement: OUTPUT OPEN_PAREN expression (expression)* CLOSE_PAREN ;
-
+// Выражения
 expression: operand (relationOp operand)* ;
-operand: addend (additionOp addend)* ;
-addend: multiplier (multiplicationOp multiplier)* ;
-multiplier: identifier | number | logicalConstant | unaryOp multiplier | OPEN_PAREN expression CLOSE_PAREN ;
+operand: summand (additionOp summand)* ;
+summand: multiplier (multiplicationOp multiplier)* ;
+multiplier: IDENTIFIER | INTEGER | REAL | logicalConstant | NOT multiplier ;
+
+logicalConstant: TRUE | FALSE ;
 
 // Операции
 relationOp: NE | EQ | LT | LE | GT | GE ;
 additionOp: PLUS | MIN | OR ;
 multiplicationOp: MULT | DIV | AND ;
-unaryOp: TILDE ;
-
-// Идентификаторы и числа
-identifier: IDENTIFIER ;
-number: INTEGER | REAL ;
-
-// Типы
-type: WHOLE | VALID | LOGICAL ;
-
-// Логические константы
-logicalConstant: LOGICAL_CONST ;
-
-logicalExpression: operand (logicalOp operand)* ;
-logicalOp: AND | OR ;
 
 //
 // ЛЕКСЕМЫ ААААААААААААААААААААААААААААААААААААААА
 //
 
 // Операции
-NE: 'NE' ;
-EQ: 'EQ' ;
-LT: 'LT' ;
-LE: 'LE' ;
-GT: 'GT' ;
-GE: 'GE' ;
-PLUS: 'plus' ;
-MIN: 'min' ;
-OR: 'or' ;
-MULT: 'mult' ;
-DIV: 'div' ;
-AND: 'and' ;
-TILDE: '~' ;
 
 // Символы
 OPEN_CURLY: '{' ;
@@ -90,23 +66,53 @@ INPUT: 'input' ;
 OUTPUT: 'output' ;
 
 // Типы
-WHOLE: '%' ;
-VALID: '!' ;
-LOGICAL: '$' ;
+TYPE_INTEGER: '%' ;
+TYPE_REAL: '!' ;
+TYPE_BOOLEAN: '$' ;
 
-// Идентификаторы и числа
-IDENTIFIER: LETTER (LETTER | INTEGER)* ;
-INTEGER: (BINARY+ ('B' | 'b') | OCTAL+ ('O' | 'o') | DIGIT+ ('D' | 'd')? | HEXDIGIT+ ('H' | 'h')) ;
-REAL: (DIGIT+ '.' DIGIT* | '.' DIGIT+) (EXPONENT)? ;
-LOGICAL_CONST: 'true' | 'false' ;
+// Токены для группы операций отношения
+NE: 'NE' ;
+EQ: 'EQ' ;
+LT: 'LT' ;
+LE: 'LE' ;
+GT: 'GT' ;
+GE: 'GE' ;
 
-// Символы
-LETTER: [a-zA-Z] ;
-DIGIT: [0-9] ;
-BINARY: '0' | '1';
-OCTAL: [0-7] ;
-HEXDIGIT: [0-9a-fA-F] ;
-EXPONENT: ('E' | 'e') ('+' | '-')? DIGIT+ ;
+// Токены для группы операций сложения
+PLUS: 'plus' ;
+MIN: 'min' ;
+OR: 'or' ;
+
+// Токены для группы операций умножения
+MULT: 'mult' ;
+DIV: 'div' ;
+AND: 'and' ;
+
+// Токен для унарной операции
+NOT: '~' ;
+
+// Токены для логических констант
+TRUE: 'true' ;
+FALSE: 'false' ;
+
+// Токен для идентификаторов
+IDENTIFIER: LETTER (LETTER | DIGIT)* ;
+// Токены для чисел
+INTEGER: BINARY | OCTAL | DECIMAL | HEX ;
+REAL: DIGIT+ (E PLUS_MINUS? DIGIT+)? | (DIGIT+ '.') DIGIT+ (E PLUS_MINUS? DIGIT+)? ;
+
+// Вспомогательные лексические правила
+fragment LETTER: [a-zA-Z] ;
+fragment DIGIT: [0-9] ;
+fragment BINARY: BINARY_DIGIT+ ('B' | 'b') ;
+fragment BINARY_DIGIT: '0' | '1' ;
+fragment OCTAL: OCTAL_DIGIT+ ('O' | 'o') ;
+fragment OCTAL_DIGIT: [0-7] ;
+fragment DECIMAL: DIGIT+ ('D' | 'd')? ;
+fragment HEX: HEX_DIGIT+ ('H' | 'h') ;
+fragment HEX_DIGIT: DIGIT | [A-Fa-f] ;
+fragment E: 'E' | 'e' ;
+fragment PLUS_MINUS: '+' | '-' ;
 
 // Пропускаемые символы
 WS: [ \t\r\n]+ -> skip ;
